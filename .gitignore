@@ -1,0 +1,3 @@
+venv_cmd/
+.vscode/
+core/__pycache__/
