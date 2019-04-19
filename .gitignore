@@ -1,2 +1,6 @@
 .vscode/
 core/__pycache__/
+venv_cmd/
+joern-0.3.1/
+python-joern-0.3.1/
+.joernIndex/
