@@ -204,7 +204,7 @@ class Core(object):
 
 
 
-def scan(target_File):
+def scan(target_File, curr_lan_set):
     """
     target_File is absolute path of target file/dir
     """
@@ -227,8 +227,8 @@ def scan(target_File):
 
     try:
         pool = multiprocessing.Pool()
-        for lan in supported_lan:
-            print("lan ",lan)
+        for lan in curr_lan_set:
+            print("processing ",lan, "language files")
             pool.apply_async(scan_single_lan, args=(target_File, lan), callback=results_handler)
 
         pool.close()

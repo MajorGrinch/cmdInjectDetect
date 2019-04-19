@@ -6,3 +6,4 @@ from core.languages import ext_to_lan
 # print(result)
 a = ext_to_lan
 print(a)
+print(a)
