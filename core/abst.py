@@ -1,35 +1,27 @@
 """
-Implement Abstract Syntax tree for target sink function call
-in one line of one target file.
+Implement analysis on target sink function.
 
-In summary, one cAST instance serve one function call node
+In summary, one sinkchecker instance analyze one function call
 """
 
 from pycparser import c_ast, c_parser, parse_file
 from .sinks import input_func
 
-class cAST(object):
-    def __init__(self, target_file_path, line_number: int, function_name):
+class SinkChecker(object):
+    def __init__(self, target_file_path, line_number, function_name, ast):
         self.file_path = target_file_path
         self.line_number = line_number
         self.function_name = function_name
-        self.ast = parse_file(
-            self.file_path,
-            use_cpp=True,
-            cpp_path='gcc',
-            cpp_args=[
-                '-E',
-                r'-I/Users/kirk/homework/spring2019/cse637/class_project/cmdDetect/utils/fake_libc_include'
-            ])
+        self.ast = ast
         self.func_param_list = None
         # print(self.file_path, self.line_number)
         # print(self.input_functions)
 
-    def get_FuncCall_by_funcname(self, func_name, node):
-        if func_name is None or func_name == '':
-            return None
-        for nextNode in node:
-            pass
+    # def get_FuncCall_by_funcname(self, func_name, node):
+    #     if func_name is None or func_name == '':
+    #         return None
+    #     for nextNode in node:
+    #         pass
 
 
     def check_func_called(self):

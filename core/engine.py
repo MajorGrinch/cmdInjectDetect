@@ -7,7 +7,8 @@ from .export import list_to_prettytable
 from .languages import supported_lan
 from .sinks import dict_sink, fpc_multi, fpc_single
 from .file_util import Tool
-from .abst import cAST
+from .abst import SinkChecker
+from pycparser import c_ast, c_parser, parse_file
 
 class CmdInjDetect(object):
     """
@@ -193,10 +194,19 @@ class Core(object):
             return False, 'Special Files'
         # decide whether the paramter is controllable
         # print('[CORE.SCAN]',self.file_path, self.line_number, self.function_name)
-        cast = cAST(self.file_path, self.line_number, self.function_name)
-        if cast.check_func_called() is False:
+        # cast = cAST(self.file_path, self.line_number, self.function_name)
+        ast = parse_file(
+            self.file_path,
+            use_cpp=True,
+            cpp_path='gcc',
+            cpp_args=[
+                '-E',
+                r'-I/Users/kirk/homework/spring2019/cse637/class_project/cmdDetect/utils/fake_libc_include'
+            ])
+        checker = SinkChecker(self.file_path, self.line_number, self.function_name, ast)
+        if checker.check_func_called() is False:
             return False, 'Not called'
-        if cast.is_param_controllable():
+        if checker.is_param_controllable():
             return True, 'Function Parameter is user controllable'
         return False, 'No reason'
 

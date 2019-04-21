@@ -19,7 +19,7 @@ def main():
         args = argparser.parse_args()
         cli.start(args.target, args.output)
         time_ed = time.time()
-        print('Init finish! Duration: {0}s'.format(time_ed-time_st))
+        print('Scan complete! Duration: {0}s'.format(time_ed-time_st))
 
     except Exception as e:
         pass
