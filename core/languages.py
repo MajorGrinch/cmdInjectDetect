@@ -4,7 +4,8 @@ list supported languages and their related operations
 
 
 
-supported_lan = {'c': ['.c'], 'php': ['.php', '.php4', '.php5']}
+# supported_lan = {'c': ['.c'], 'php': ['.php', '.php4', '.php5']}
+supported_lan = {'c': ['.c']}
 # ext_to_lan = {'.c': 'c', '.php' : 'php', '.php4' :'php', '.php5': 'php'}
 
 def get_ext_to_lan():

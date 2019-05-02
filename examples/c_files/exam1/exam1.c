@@ -1,5 +1,5 @@
 #include <stdio.h>
-#include <unistd.h>
+// #include <unistd.h>
 
 int main(int argc, char **argv)
 {
@@ -7,12 +7,12 @@ int main(int argc, char **argv)
     char *command;
     size_t commandLength;
 
+    char *argument = argv[1];
     commandLength = strlen(cat) + strlen(argv[1]) + 1;
     command = (char *)malloc(commandLength);
     strncpy(command, cat, commandLength);
-    strncat(command, argv[1], (commandLength - strlen(cat)));
-    int a=exec(command);
-    my_exec(command);
-    exec(command, NULL);
+    strncat(command, argument, (commandLength - strlen(cat)));
+    printf("%s", command);
+    system(command, NULL, NULL);
     return (0);
 }

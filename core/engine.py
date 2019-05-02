@@ -55,6 +55,7 @@ class CmdInjDetect(object):
             pass
         if len(error) != 0:
             print(error.strip())
+        print(result)
         return result
 
 
@@ -203,7 +204,7 @@ class Core(object):
                 '-E',
                 r'-I/Users/kirk/homework/spring2019/cse637/class_project/cmdDetect/utils/fake_libc_include'
             ])
-        checker = SinkChecker(self.file_path, self.line_number, self.function_name, ast)
+        checker = SinkChecker(self.file_path, self.line_number, self.function_name, ast, self.language)
         if checker.check_func_called() is False:
             return False, 'Not called'
         if checker.is_param_controllable():

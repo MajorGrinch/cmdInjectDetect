@@ -5,14 +5,15 @@ In summary, one sinkchecker instance analyze one function call
 """
 
 from pycparser import c_ast, c_parser, parse_file
-from .sinks import input_func
+from .sinks import input_func, str_func
 
 class SinkChecker(object):
-    def __init__(self, target_file_path, line_number, function_name, ast):
+    def __init__(self, target_file_path, line_number, function_name, ast, language):
         self.file_path = target_file_path
         self.line_number = line_number
         self.function_name = function_name
         self.ast = ast
+        self.language = language
         self.func_param_list = None
         # print(self.file_path, self.line_number)
         # print(self.input_functions)
@@ -42,15 +43,15 @@ class SinkChecker(object):
         return self.func_param_list
 
     def is_param_controllable(self):
-        tv = TraceVariable(self.func_param_list[0])
+        tv = TraceVariable(self.func_param_list[0], self.language)
         tv.visit(self.ast)
         return tv.is_from_input
 
 
 class TraceVariable(c_ast.NodeVisitor):
-    def __init__(self, var_name):
+    def __init__(self, var_name, language):
         self.target_var = var_name
-        self.input_functions = input_func['c']
+        self.input_functions = input_func[language]
         self.is_from_input = False
 
     def visit_FuncCall(self, node):
@@ -65,8 +66,28 @@ class TraceVariable(c_ast.NodeVisitor):
                     self.is_from_input = True
 
 
+class TraceStrFunc(c_ast.NodeVisitor):
+    def __init__(self, var_name, language):
+        self.target_var = var_name
+        self.str_func = str_func[language]
+        self.is_from_input = False
+        self.target_passed_by = None
 
+    def visit_FuncCall(self, node):
+        if node.name.name in self.str_func:
+            dest_var = node.args.exprs[0].name
+            src_var = node.args.exprs[1].name
+            # print(node.args.exprs)
+            if self.target_var == dest_var:
+                if 'argv' in repr(src_var):
+                    self.is_from_input = True
+                else:
+                    self.target_passed_by = src_var
 
+"""
+traverse the whole ast to check whether a given function call
+on the specific line gets called
+"""
 class FuncCallVisitor(c_ast.NodeVisitor):
     def __init__(self, funcname, line_number):
         self.func_name = funcname
