@@ -8,3 +8,4 @@ pyc-cfg/
 .DS_Store
 testFile.py
 run.py
+neo4j_docker
