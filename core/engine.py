@@ -34,7 +34,7 @@ class CmdInjDetect(object):
             match_expr = fpc_multi.replace('[f]', dict_sink[lan])
         else:
             match_expr = fpc_single.replace('[f]', dict_sink[lan])
-        print(match_expr)
+        # print(match_expr)
         filters = []
         for ext in supported_lan[lan]:
             filters.append('--include=*' + ext)
@@ -45,6 +45,7 @@ class CmdInjDetect(object):
         param = [self.grep, "-snrP"] + filters + [match_expr, target_File]
         # print(type(param))
 
+        result = ""
         try:
             p = subprocess.Popen(param, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
             result, error = p.communicate()
@@ -57,7 +58,7 @@ class CmdInjDetect(object):
             pass
         if len(error) != 0:
             print(error.strip())
-        print(result)
+        # print(result)
         return result
 
 
@@ -126,7 +127,7 @@ class CmdInjDetect(object):
             # is_test = False
             try:
                 is_vul, reason = Core(self.target_File, vulnerability).scan()
-                print(reason)
+                # print(reason)
                 if is_vul:
                     # print(vulnerability.file_abs_path, vulnerability.line_number, reason)
                     confirmed_vulnerabilities.append(vulnerability)
@@ -211,17 +212,17 @@ class Core(object):
             return False, 'Not called'
         # if analyzeFunctionCall(self.line_number, self.function_name):
             # return True, 'Reachable By User Input'
-        param = ["python2"]
+        param = ["python2", "core/data_flow_util.py", str(self.line_number) , self.function_name]
+
         try:
             p = subprocess.Popen(param, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-            result, error = p.communicate()
+            isControllable_str, error = p.communicate()
+            isControllable = bool(isControllable_str)
+            print("Reachable By User? " + str(isControllable))
+            if isControllable:
+                return True, 'Reachable By UserInput'
         except Exception as e:
             print(e)
-        try:
-            result = result.decode('utf-8')
-            error = error.decode('utf-8')
-        except AttributeError as e:
-            pass
 
         # if checker.is_param_controllable():
             # return True, 'Function Parameter is user controllable'
