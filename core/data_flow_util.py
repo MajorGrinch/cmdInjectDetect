@@ -6,6 +6,7 @@ should run under python2
 
 from joern.all import JoernSteps
 import re
+import os
 
 
 transfer_funcs = {'c': ['fscanf','sscanf', 'fscanf_s', 'sscanf_s', 'sprintf', 'snpirntf', 'strcpy', 'strncpy', 'strcat', 'strncat', 'memcpy']}
@@ -17,6 +18,7 @@ transfer_funcs_re_expr = '(' + '|'.join(transfer_funcs['c']) + r')\s*\('
 
 userinput_funcs_re_expr = '(' + '|'.join(userinput_funcs['c']) + r')\s*\('
 
+db_url = 'http://3.83.184.179:7474/db/data/'
 
 
 transfer_funcs_patt = re.compile(transfer_funcs_re_expr)
@@ -27,6 +29,10 @@ userinput_funcs_patt = re.compile(userinput_funcs_re_expr)
 query = 'getArguments("*system*", "0").definitions().defines()
 
 find the symbol used as the first argument to sensitive function calls
+"""
+
+"""
+query = 'getArguments("*system*", "0").definitions().defines()'
 """
 
 checked_nodes = set() # nodes that have already been visited
@@ -92,18 +98,35 @@ def traceBackVariable(node):
     return False
 
 
-def analyzeFunctionCall(funcCall):
+def analyzeFunctionCall(func_line, func_name):
+    # callexpr_node = get_call_by_line_name(func_line, func_name)
+    query = 'getArguments("*system*", "0").definitions().defines()'
     j = JoernSteps()
-    j.setGraphDbURL('http://3.83.184.179:7474/db/data/')
+    j.setGraphDbURL(db_url)
     j.connectToDatabase()
-    query = 'getArguments("*system*", "0").definitions().defines().inE(DEFINES_EDGE).outV().filter{it.isCFGNode=="True"}'
-    # find the definition statement of the first argument of the sensitive func calls
-    res =  j.runGremlinQuery(query)
+    res = j.runGremlinQuery(query)
+    print(res)
     is_controllable_by_user = reachableByInput(res[0])
+    print(is_controllable_by_user)
     return is_controllable_by_user
 
 
-def getFunctionCallByName(funcCall):
-    pass
+def get_call_by_line_name(line, func_name):
+    j = JoernSteps()
+    j.setGraphDbURL(db_url)
+    my_steps_dir = os.getcwd() + '/mysteps'
+    j.addStepsDir(my_steps_dir)
+    j.connectToDatabase()
+    query = 'OR(getCallsTo("*{0}*").parents(), getCallsTo("*{0}*").ithArguments("0"))'.format(func_name)
+    res = j.runGremlinQuery(query)
+    for i in range(len(res)):
+        r = res[i]
+        if r["location"]:
+            r_line = r["location"].split(':')[0]
+            if int(r_line) == line:
+                print(res[i+1])
+                return res[i+1]
 
-analyzeFunctionCall("aaaa")
+
+result = analyzeFunctionCall(25, "system")
+print(result)

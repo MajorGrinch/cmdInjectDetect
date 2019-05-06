@@ -16,6 +16,7 @@ class CmdInjDetect(object):
     """
 
     def __init__(self, target_File_path, lan):
+        print("----" + target_File_path)
         self.target_File = target_File_path
         self.grep = Tool().grep
         self.language = lan
@@ -68,6 +69,7 @@ class CmdInjDetect(object):
         # print(match_vul_str)
         if ':' in match_vul_str:
             try:
+                current_dir = os.getcwd()
                 if os.path.isdir(self.target_File):
                     line_number_str, res.code_content = re.findall(r':(\d+):(.*)', match_vul_str)[0]
                     res.line_number = int(line_number_str)
@@ -78,6 +80,8 @@ class CmdInjDetect(object):
                     res.line_number = int(line_number_str)
                     # res.line_number = line_number_str
                     res.file_abs_path = self.target_File
+
+                res.file_rela_path = res.file_abs_path.replace(current_dir, '')
             except Exception:
                 res.file_abs_path = ''
                 res.code_content = ''
@@ -206,6 +210,7 @@ class Core(object):
             return False, 'Not called'
         # if checker.is_param_controllable():
             # return True, 'Function Parameter is user controllable'
+        return True, 'No reason1'
         return False, 'No reason'
 
 
@@ -223,14 +228,15 @@ def scan(target_File, curr_lan_set):
             Personally I tend to write if-else first and place for-loop inside them for performance issue.
             But I think the branch prediction technique in the CPU would take care of this since for a particular
             """
-            remove_path = ''
-            if os.path.isdir(target_File):
-                remove_path = target_File
-            else:
-                remove_path = os.path.dirname(target_File)
+            # remove_path = ''
+            # if os.path.isdir(target_File):
+            #     remove_path = target_File
+            # else:
+            #     remove_path = os.path.dirname(target_File)
+            # current_dir = os.getcwd()
 
             for res in results:
-                res.file_rela_path = res.file_abs_path.replace(remove_path, '')
+            #     res.file_rela_path = res.file_abs_path.replace(current_dir, '')
                 found_vul.append(res)
 
     try:
