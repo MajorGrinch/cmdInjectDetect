@@ -32,7 +32,7 @@ class CmdInjDetect(object):
             match_expr = fpc_multi.replace('[f]', dict_sink[lan])
         else:
             match_expr = fpc_single.replace('[f]', dict_sink[lan])
-        # print(match_expr)
+        print(match_expr)
         filters = []
         for ext in supported_lan[lan]:
             filters.append('--include=*' + ext)
@@ -57,8 +57,6 @@ class CmdInjDetect(object):
             print(error.strip())
         print(result)
         return result
-
-
 
 
 
@@ -123,6 +121,7 @@ class CmdInjDetect(object):
             # is_test = False
             try:
                 is_vul, reason = Core(self.target_File, vulnerability).scan()
+                print(reason)
                 if is_vul:
                     # print(vulnerability.file_abs_path, vulnerability.line_number, reason)
                     confirmed_vulnerabilities.append(vulnerability)
@@ -193,9 +192,7 @@ class Core(object):
             return False, 'Annotation'
         if self.is_special_file():
             return False, 'Special Files'
-        # decide whether the paramter is controllable
-        # print('[CORE.SCAN]',self.file_path, self.line_number, self.function_name)
-        # cast = cAST(self.file_path, self.line_number, self.function_name)
+
         ast = parse_file(
             self.file_path,
             use_cpp=True,
@@ -207,8 +204,8 @@ class Core(object):
         checker = SinkChecker(self.file_path, self.line_number, self.function_name, ast, self.language)
         if checker.check_func_called() is False:
             return False, 'Not called'
-        if checker.is_param_controllable():
-            return True, 'Function Parameter is user controllable'
+        # if checker.is_param_controllable():
+            # return True, 'Function Parameter is user controllable'
         return False, 'No reason'
 
 

@@ -9,3 +9,5 @@ pyc-cfg/
 testFile.py
 run.py
 neo4j_docker
+*.pyc
+examples/
