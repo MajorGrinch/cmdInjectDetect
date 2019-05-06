@@ -1,3 +1,7 @@
+"""
+some test functions
+"""
+
 
 """
 interprocedure data flow analysis
@@ -7,7 +11,6 @@ should run under python2
 from joern.all import JoernSteps
 import re
 import os
-from sys import argv
 
 
 transfer_funcs = {'c': ['fscanf','sscanf', 'fscanf_s', 'sscanf_s', 'sprintf', 'snpirntf', 'strcpy', 'strncpy', 'strcat', 'strncat', 'memcpy']}
@@ -33,10 +36,8 @@ find the symbol used as the first argument to sensitive function calls
 """
 
 """
-query = 'getArguments("*system*", "0").definitions().defines().inE(DEFINES_EDGE).outV().parents()'
-find the define/assignment sites of the first arg to sensitive function calls
+query = 'getArguments("*system*", "0").definitions().defines()'
 """
-
 
 checked_nodes = set() # nodes that have already been visited
 
@@ -66,6 +67,8 @@ def reachableByInput(node):
         elif out_edge.rel.type == "FLOWS_TO":
             cfg_next_list.append(out_edge.end_node)
 
+    print(pdg_next_list)
+
     if traceBackVariable(node):
         return True
     # check that the def has data dep on previous statement
@@ -89,7 +92,7 @@ def traceBackVariable(node):
     """ find out if this node depend on previous statements's data
     """
     checked_nodes.add(node)
-    # print(node)
+    print(node)
     if containsUserInput(node):
         return True
     for edge in node.match_incoming():
@@ -100,42 +103,5 @@ def traceBackVariable(node):
 
     return False
 
-
-def analyzeFunctionCall(func_line, func_name):
-    arg_def_node = get_call_by_line_name(func_line, func_name)
-    is_controllable_by_user = reachableByInput(arg_def_node)
-    return is_controllable_by_user
-
-
-def get_call_by_line_name(line, func_name):
-    j = JoernSteps()
-    j.setGraphDbURL(db_url)
-    # my_steps_dir = os.getcwd() + '/mysteps'
-    # j.addStepsDir(my_steps_dir)
-    j.connectToDatabase()
-    # query = 'getArguments("*{0}*", "0").definitions().defines().inE(DEFINES_EDGE).outV().parents()'.format(func_name)
-    # sink_arg1_define_sites = j.runGremlinQuery(query)
-    query = 'getCallsTo("*system*").parents()'
-    sink_expr_statement_node = j.runGremlinQuery(query)
-    # for r in sink_expr_statement_node:
-        # print(r)
-    # for r in sink_expr_statement_node:
-        # print(r)
-    # print("---"*30)
-    for r in sink_expr_statement_node:
-        if r["location"]:
-            r_line = r["location"].split(':')[0]
-            if int(r_line) == int(line):
-                nodeIdx = r.uri.path.segments[-1]
-                query = 'g.v({0}).children().ithArguments("0").definitions().defines().inE("DEF").outV().parents()'.format(nodeIdx)
-                res = j.runGremlinQuery(query)
-                # print(res[0])
-                return res[0]
-
-
-if __name__ == "__main__":
-    if len(argv) > 2:
-        # print(argv[1])
-        result = analyzeFunctionCall(argv[1], argv[2])
-        print(result)
-# print(result)
+# isControl = reachableByInput(res[0])
+# print(isControl)

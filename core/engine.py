@@ -9,6 +9,7 @@ from .sinks import dict_sink, fpc_multi, fpc_single
 from .file_util import Tool
 from .abst import SinkChecker
 from pycparser import c_ast, c_parser, parse_file
+from .data_flow_util import analyzeFunctionCall
 
 class CmdInjDetect(object):
     """
@@ -208,9 +209,22 @@ class Core(object):
         checker = SinkChecker(self.file_path, self.line_number, self.function_name, ast, self.language)
         if checker.check_func_called() is False:
             return False, 'Not called'
+        # if analyzeFunctionCall(self.line_number, self.function_name):
+            # return True, 'Reachable By User Input'
+        param = ["python2"]
+        try:
+            p = subprocess.Popen(param, stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+            result, error = p.communicate()
+        except Exception as e:
+            print(e)
+        try:
+            result = result.decode('utf-8')
+            error = error.decode('utf-8')
+        except AttributeError as e:
+            pass
+
         # if checker.is_param_controllable():
             # return True, 'Function Parameter is user controllable'
-        return True, 'No reason1'
         return False, 'No reason'
 
 
